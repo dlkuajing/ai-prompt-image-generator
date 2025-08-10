@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>变体提示词格式修正测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .old-format {
+            border-left: 4px solid #ff4d4f;
+        }
+        .new-format {
+            border-left: 4px solid #52c41a;
+        }
+        .variant-box {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+        .test-section {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #5a67d8;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f4ff;
+            border-radius: 4px;
+            display: none;
+        }
+        .success-badge {
+            display: inline-block;
+            background: #52c41a;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔧 变体提示词格式修正</h1>
+        <p>解决了原始提示词重复的问题</p>
+    </div>
+
+    <div class="comparison">
+        <div class="card old-format">
+            <h3>❌ 旧格式（有问题）</h3>
+            <p><strong>原始提示词：</strong>一群美国高中生在操场上军训</p>
+            <div class="variant-box">
+                <span class="highlight">一群美国高中生在操场上军训</span>, in a modern coffee shop, arguing intensely, casual clothing...
+            </div>
+            <p style="color: #ff4d4f;">问题：中文原始提示词被包含在变体中，造成重复</p>
+        </div>
+
+        <div class="card new-format">
+            <h3>✅ 新格式（已修正）</h3>
+            <p><strong>原始提示词：</strong>一群美国高中生在操场上军训</p>
+            <div class="variant-box">
+                A group of American high school students in military training on playground, in bright sunshine, formal posture, wide angle view...
+            </div>
+            <p style="color: #52c41a;">修正：变体是完整的英文提示词，包含翻译后的基础内容+维度描述</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>实时测试</h2>
+        <p>输入中文提示词，查看生成的变体格式：</p>
+        
+        <div>
+            <input type="text" id="basePrompt" placeholder="输入基础提示词，如：一个男人和一个女人在吵架" style="width: 400px; padding: 8px; margin-right: 10px;">
+            <button onclick="testVariants()">生成变体</button>
+            <button onclick="clearResults()">清空</button>
+        </div>
+        
+        <div id="result"></div>
+    </div>
+
+    <div class="card" style="margin-top: 20px;">
+        <h3>📝 技术说明</h3>
+        <ul>
+            <li><strong>修改内容：</strong></li>
+            <ul>
+                <li>更新了 Gemini API 的提示模板，明确要求生成完整的英文提示词</li>
+                <li>修改了离线变体生成函数，先翻译基础提示词，再组合维度描述</li>
+                <li>确保每个变体都是独立完整的，可直接用于 Imagen 4 图片生成</li>
+            </ul>
+            <li><strong>变体格式：</strong></li>
+            <ul>
+                <li>格式：<code>[英文基础内容], [维度描述1], [维度描述2], ...</code></li>
+                <li>示例：<code>A man and a woman arguing, dramatic lighting, close-up shot</code></li>
+            </ul>
+            <li><strong>优点：</strong></li>
+            <ul>
+                <li>避免了中英文混合</li>
+                <li>变体直接可用，无需额外处理</li>
+                <li>提高了图片生成的质量和准确性</li>
+            </ul>
+        </ul>
+    </div>
+
+    <script>
+        async function testVariants() {
+            const basePrompt = document.getElementById('basePrompt').value.trim();
+            if (!basePrompt) {
+                alert('请输入基础提示词');
+                return;
+            }
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<p>生成中...</p>';
+
+            try {
+                const response = await fetch('http://localhost:8000/api/variants/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        base_prompt: basePrompt,
+                        dimensions: ['场景', '光影', '情绪', '角度'],
+                        count: 3
+                    })
+                });
+
+                const data = await response.json();
+                
+                let html = '<h3><span class="success-badge">成功</span> 生成的变体：</h3>';
+                data.variants.forEach((variant, index) => {
+                    html += `<div class="variant-box">${index + 1}. ${variant}</div>`;
+                });
+                
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">错误：${error.message}</p>`;
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('basePrompt').value = '';
+        }
+
+        // 自动填充示例
+        document.getElementById('basePrompt').value = '一个男人和一个女人在吵架';
+    </script>
+</body>
+</html>

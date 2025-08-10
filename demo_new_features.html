@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>新功能演示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        .feature-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .feature-title {
+            color: #667eea;
+            font-size: 24px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .new-badge {
+            background: #52c41a;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .image-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f9f9f9;
+        }
+        .image-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .image-info {
+            padding: 12px;
+            background: white;
+        }
+        .ratio-label {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+        .dimension-text {
+            font-size: 14px;
+            color: #666;
+        }
+        .download-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f0f4ff;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .download-btn {
+            background: #52c41a;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .download-btn:hover {
+            background: #389e0d;
+        }
+        .features-list {
+            list-style: none;
+            padding: 0;
+        }
+        .features-list li {
+            padding: 10px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎉 新功能演示</h1>
+        <p>图片比例选择 & 批量下载功能</p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-title">
+            ✨ 功能 1: 支持5种图片比例
+            <span class="new-badge">NEW</span>
+        </div>
+        <p>现在可以选择5种不同的图片比例，满足各种使用场景：</p>
+        <ul class="features-list">
+            <li><strong>1:1 (正方形)</strong> - 1024 x 1024 - 适合社交媒体头像、产品展示</li>
+            <li><strong>9:16 (竖屏)</strong> - 768 x 1408 - 适合手机壁纸、Stories</li>
+            <li><strong>16:9 (横屏)</strong> - 1408 x 768 - 适合桌面壁纸、横幅</li>
+            <li><strong>3:4 (竖版)</strong> - 适合人像照片、海报</li>
+            <li><strong>4:3 (横版)</strong> - 适合传统摄影、幻灯片</li>
+        </ul>
+        
+        <div class="images-grid">
+            <div class="image-card">
+                <img src="http://localhost:8000/api/images/fbab2daa" alt="1:1 Square">
+                <div class="image-info">
+                    <span class="ratio-label">1:1 正方形</span>
+                    <div class="dimension-text">尺寸: 1024 x 1024</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <img src="http://localhost:8000/api/images/bf26e902" alt="16:9 Landscape">
+                <div class="image-info">
+                    <span class="ratio-label">16:9 横屏</span>
+                    <div class="dimension-text">尺寸: 1408 x 768</div>
+                </div>
+            </div>
+            <div class="image-card">
+                <img src="http://localhost:8000/api/images/3ca51a9c" alt="9:16 Portrait">
+                <div class="image-info">
+                    <span class="ratio-label">9:16 竖屏</span>
+                    <div class="dimension-text">尺寸: 768 x 1408</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-title">
+            📥 功能 2: 批量下载所有图片
+            <span class="new-badge">NEW</span>
+        </div>
+        <p>一键下载所有生成的图片，自动打包成ZIP文件：</p>
+        
+        <ul class="features-list">
+            <li>✅ 自动将所有图片打包成 <span class="code">.zip</span> 文件</li>
+            <li>✅ 保留原始图片质量和分辨率</li>
+            <li>✅ 自动命名文件，包含时间戳</li>
+            <li>✅ 支持大批量图片下载（测试过20+张图片）</li>
+        </ul>
+        
+        <div class="download-section">
+            <h3>测试批量下载功能</h3>
+            <p>点击下面的按钮测试下载已生成的图片：</p>
+            <button class="download-btn" onclick="testDownload()">
+                📦 下载示例图片包 (3张)
+            </button>
+        </div>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-title">
+            🚀 技术实现细节
+        </div>
+        <h3>后端更新：</h3>
+        <ul>
+            <li>✅ 更新 <span class="code">ImageGenerateRequest</span> 模型，添加 <span class="code">aspect_ratio</span> 参数</li>
+            <li>✅ 在 Imagen 4 API 调用中传递 <span class="code">aspectRatio</span> 参数</li>
+            <li>✅ 实现 <span class="code">/api/images/download</span> 端点，支持批量下载</li>
+            <li>✅ 使用 <span class="code">zipfile</span> 模块在内存中创建ZIP文件</li>
+            <li>✅ 返回 <span class="code">StreamingResponse</span> 以支持大文件下载</li>
+        </ul>
+        
+        <h3>前端更新：</h3>
+        <ul>
+            <li>✅ 添加比例选择器UI组件（单选按钮组）</li>
+            <li>✅ 在图片生成请求中包含 <span class="code">aspect_ratio</span> 参数</li>
+            <li>✅ 添加"下载所有图片"按钮</li>
+            <li>✅ 实现 <span class="code">downloadAllImages()</span> 函数处理批量下载</li>
+            <li>✅ 收集并管理生成的图片ID列表</li>
+        </ul>
+    </div>
+
+    <script>
+        async function testDownload() {
+            const imageIds = ["fbab2daa", "44171d5c", "bf26e902", "3ca51a9c"];
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/images/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(imageIds)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('下载失败');
+                }
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `test_images_${new Date().getTime()}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                alert('下载成功！请查看下载文件夹。');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('下载失败，请检查后端服务是否运行。');
+            }
+        }
+    </script>
+</body>
+</html>

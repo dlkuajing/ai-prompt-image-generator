@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>提示词变体与图片生成工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Ubuntu', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .input-group input[type="number"] {
+            width: 200px;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .input-group input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .dimensions-container {
+            margin-bottom: 20px;
+        }
+        
+        .dimensions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .dimension-checkbox {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .dimension-checkbox:hover {
+            background: #e7f3ff;
+        }
+        
+        .dimension-checkbox input[type="checkbox"] {
+            margin-right: 8px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .dimension-checkbox.selected {
+            background: #e7f3ff;
+            border: 2px solid #667eea;
+        }
+        
+        .select-controls {
+            margin: 10px 0;
+        }
+        
+        .select-controls button {
+            margin-right: 10px;
+            padding: 6px 12px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .select-controls button:hover {
+            background: #e0e0e0;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .variants-container {
+            margin-top: 20px;
+        }
+        
+        .variant-card {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            position: relative;
+            transition: transform 0.2s;
+        }
+        
+        .variant-card:hover {
+            transform: translateX(4px);
+            background: #f0f4ff;
+        }
+        
+        .variant-card.selected {
+            background: #e7f3ff;
+            border: 2px solid #667eea;
+        }
+        
+        .variant-checkbox {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .variant-text {
+            color: #333;
+            line-height: 1.6;
+            margin-left: 40px;
+            margin-right: 60px;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .copy-btn:hover {
+            background: #5a67d8;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .success-msg {
+            background: #52c41a;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .generate-images-btn {
+            background: #52c41a;
+            margin-top: 20px;
+        }
+        
+        .generate-images-btn:hover {
+            box-shadow: 0 10px 20px rgba(82, 196, 26, 0.4);
+        }
+        
+        .selection-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f0f4ff;
+            border-radius: 8px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+        
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .image-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .image-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+        
+        .image-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+        
+        .image-info {
+            padding: 12px;
+        }
+        
+        .image-prompt {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .image-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .image-actions button {
+            flex: 1;
+            padding: 6px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .image-actions button:hover {
+            background: #f0f0f0;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+        }
+        
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90%;
+            margin-top: 50px;
+        }
+        
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #bbb;
+        }
+        
+        .stats-info {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .ratio-option {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .ratio-option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .ratio-option input[type="radio"] {
+            margin-right: 8px;
+        }
+        
+        .ratio-option input[type="radio"]:checked + .ratio-label {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .ratio-option:has(input:checked) {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 提示词变体与图片生成工具</h1>
+            <p>使用AI智能生成提示词变体，批量创建高质量图片</p>
+        </div>
+        
+        <div class="card">
+            <div class="input-group">
+                <label for="basePrompt">输入基础提示词</label>
+                <textarea 
+                    id="basePrompt" 
+                    rows="4" 
+                    placeholder="例如：一个男人和一个女人在吵架"
+                ></textarea>
+            </div>
+            
+            <div class="input-group">
+                <label for="variantCount">生成数量</label>
+                <input 
+                    type="number" 
+                    id="variantCount" 
+                    min="1" 
+                    max="20" 
+                    value="8"
+                    placeholder="输入1-20之间的数字"
+                />
+            </div>
+            
+            <div class="dimensions-container">
+                <label style="font-weight: 600; margin-bottom: 10px; display: block;">选择变化维度</label>
+                <div class="select-controls">
+                    <button onclick="selectAllDimensions()">全选</button>
+                    <button onclick="deselectAllDimensions()">取消全选</button>
+                    <button onclick="selectRandomDimensions()">随机选择</button>
+                </div>
+                <div class="dimensions-grid" id="dimensionsGrid">
+                    <!-- 维度选项将动态加载 -->
+                </div>
+            </div>
+            
+            <button class="btn" id="generateBtn" onclick="generateVariants()">
+                生成变体
+            </button>
+        </div>
+        
+        <div class="card" id="statsCard" style="display: none;">
+            <div class="stats-info">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalVariants">0</div>
+                    <div class="stat-label">生成变体数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="selectedVariants">0</div>
+                    <div class="stat-label">已选择变体</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="generatedImages">0</div>
+                    <div class="stat-label">生成图片数</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card" id="resultsCard" style="display: none;">
+            <h2 style="margin-bottom: 20px;">生成的变体</h2>
+            <div class="selection-info">
+                <div>
+                    <button onclick="selectAllVariants()">全选</button>
+                    <button onclick="deselectAllVariants()">取消全选</button>
+                </div>
+                <div>
+                    已选择: <span id="selectedCount">0</span> / <span id="totalCount">0</span>
+                </div>
+            </div>
+            <div id="variantsContainer" class="variants-container"></div>
+            
+            <!-- 添加图片比例选择 -->
+            <div style="margin-top: 20px; padding: 15px; background: #f0f4ff; border-radius: 8px;">
+                <label style="font-weight: 600; display: block; margin-bottom: 10px;">选择图片比例：</label>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <label class="ratio-option">
+                        <input type="radio" name="aspectRatio" value="1:1" checked>
+                        <span class="ratio-label">1:1 (正方形)</span>
+                    </label>
+                    <label class="ratio-option">
+                        <input type="radio" name="aspectRatio" value="9:16">
+                        <span class="ratio-label">9:16 (竖屏)</span>
+                    </label>
+                    <label class="ratio-option">
+                        <input type="radio" name="aspectRatio" value="16:9">
+                        <span class="ratio-label">16:9 (横屏)</span>
+                    </label>
+                    <label class="ratio-option">
+                        <input type="radio" name="aspectRatio" value="3:4">
+                        <span class="ratio-label">3:4 (竖版)</span>
+                    </label>
+                    <label class="ratio-option">
+                        <input type="radio" name="aspectRatio" value="4:3">
+                        <span class="ratio-label">4:3 (横版)</span>
+                    </label>
+                </div>
+            </div>
+            
+            <button class="btn generate-images-btn" onclick="generateImages()">
+                批量生成图片
+            </button>
+        </div>
+        
+        <div class="card" id="imagesCard" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;">生成的图片</h2>
+                <button class="btn" id="downloadAllBtn" onclick="downloadAllImages()" style="background: #52c41a;">
+                    📥 下载所有图片
+                </button>
+            </div>
+            <div class="progress-bar" id="progressBar" style="display: none;">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+            <div class="images-grid" id="imagesGrid"></div>
+        </div>
+        
+        <div class="card" id="loadingCard" style="display: none;">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p id="loadingText">正在生成变体，请稍候...</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 图片预览模态框 -->
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+    
+    <script>
+        // 维度选项
+        const dimensions = [
+            '场景', '动作', '穿着', '光影', '站位', '情绪', '构图',
+            '色调', '风格', '时间', '天气', '角度', '特效', 
+            '材质', '纹理', '氛围', '细节', '背景'
+        ];
+        
+        let selectedDimensions = new Set(['场景', '动作', '穿着', '光影', '站位', '情绪', '构图']);
+        let variantsList = [];
+        let selectedVariantIndices = new Set();
+        let generatedImageIds = [];  // 存储生成的图片ID
+        
+        // 初始化维度选择器
+        function initDimensions() {
+            const grid = document.getElementById('dimensionsGrid');
+            grid.innerHTML = '';
+            
+            dimensions.forEach(dim => {
+                const div = document.createElement('div');
+                div.className = 'dimension-checkbox' + (selectedDimensions.has(dim) ? ' selected' : '');
+                div.innerHTML = `
+                    <input type="checkbox" id="dim-${dim}" value="${dim}" 
+                           ${selectedDimensions.has(dim) ? 'checked' : ''}
+                           onchange="toggleDimension('${dim}')">
+                    <label for="dim-${dim}">${dim}</label>
+                `;
+                grid.appendChild(div);
+            });
+        }
+        
+        function toggleDimension(dim) {
+            const checkbox = document.getElementById(`dim-${dim}`);
+            const parent = checkbox.parentElement;
+            
+            if (checkbox.checked) {
+                selectedDimensions.add(dim);
+                parent.classList.add('selected');
+            } else {
+                selectedDimensions.delete(dim);
+                parent.classList.remove('selected');
+            }
+        }
+        
+        function selectAllDimensions() {
+            dimensions.forEach(dim => {
+                selectedDimensions.add(dim);
+                const checkbox = document.getElementById(`dim-${dim}`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    checkbox.parentElement.classList.add('selected');
+                }
+            });
+        }
+        
+        function deselectAllDimensions() {
+            selectedDimensions.clear();
+            dimensions.forEach(dim => {
+                const checkbox = document.getElementById(`dim-${dim}`);
+                if (checkbox) {
+                    checkbox.checked = false;
+                    checkbox.parentElement.classList.remove('selected');
+                }
+            });
+        }
+        
+        function selectRandomDimensions() {
+            deselectAllDimensions();
+            const randomCount = Math.floor(Math.random() * 5) + 5; // 5-10个维度
+            const shuffled = [...dimensions].sort(() => Math.random() - 0.5);
+            shuffled.slice(0, randomCount).forEach(dim => {
+                selectedDimensions.add(dim);
+                const checkbox = document.getElementById(`dim-${dim}`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    checkbox.parentElement.classList.add('selected');
+                }
+            });
+        }
+        
+        async function generateVariants() {
+            const basePrompt = document.getElementById('basePrompt').value.trim();
+            const variantCount = parseInt(document.getElementById('variantCount').value) || 8;
+            
+            if (!basePrompt) {
+                showMessage('请输入基础提示词', 'error');
+                return;
+            }
+            
+            if (selectedDimensions.size === 0) {
+                showMessage('请至少选择一个变化维度', 'error');
+                return;
+            }
+            
+            // 显示加载状态
+            document.getElementById('loadingCard').style.display = 'block';
+            document.getElementById('resultsCard').style.display = 'none';
+            document.getElementById('statsCard').style.display = 'none';
+            document.getElementById('imagesCard').style.display = 'none';
+            document.getElementById('generateBtn').disabled = true;
+            
+            try {
+                // 调用后端API
+                const response = await fetch('http://192.168.88.98:8000/api/variants/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        base_prompt: basePrompt,
+                        dimensions: Array.from(selectedDimensions),
+                        count: variantCount
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('API请求失败');
+                }
+                
+                const data = await response.json();
+                variantsList = data.variants;
+                
+                displayVariants(variantsList);
+                updateStats();
+                
+                document.getElementById('loadingCard').style.display = 'none';
+                document.getElementById('resultsCard').style.display = 'block';
+                document.getElementById('statsCard').style.display = 'block';
+                
+                showMessage(`成功生成${variantsList.length}个变体！`);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                // 使用备用方案
+                generateVariantsOffline(basePrompt, variantCount);
+            } finally {
+                document.getElementById('generateBtn').disabled = false;
+            }
+        }
+        
+        function generateVariantsOffline(basePrompt, count) {
+            // 离线生成变体（备用方案）
+            const templates = [
+                'in a modern coffee shop, warm ambient lighting, casual contemporary clothing',
+                'at golden hour sunset, dramatic backlighting, formal business attire',
+                'in heavy rain on city street, moody blue lighting, rain-soaked clothes',
+                'in minimalist white room, soft diffused lighting, elegant designer outfits',
+                'in bustling urban park, natural daylight, sporty casual wear',
+                'in dimly lit restaurant, candlelight ambiance, evening formal wear',
+                'on rooftop at night, neon city lights background, street fashion',
+                'in home living room, warm domestic lighting, comfortable home clothes'
+            ];
+            
+            variantsList = [];
+            for (let i = 0; i < count && i < templates.length; i++) {
+                variantsList.push(`${basePrompt} ${templates[i]}`);
+            }
+            
+            displayVariants(variantsList);
+            updateStats();
+            
+            document.getElementById('loadingCard').style.display = 'none';
+            document.getElementById('resultsCard').style.display = 'block';
+            document.getElementById('statsCard').style.display = 'block';
+            
+            showMessage(`成功生成${variantsList.length}个变体！`);
+        }
+        
+        function displayVariants(variants) {
+            const container = document.getElementById('variantsContainer');
+            container.innerHTML = '';
+            selectedVariantIndices.clear();
+            
+            variants.forEach((variant, index) => {
+                const variantCard = document.createElement('div');
+                variantCard.className = 'variant-card';
+                variantCard.innerHTML = `
+                    <input type="checkbox" class="variant-checkbox" 
+                           id="variant-${index}" 
+                           onchange="toggleVariantSelection(${index})">
+                    <div class="variant-text">${variant}</div>
+                    <button class="copy-btn" onclick="copyToClipboard(variantsList[${index}])">
+                        复制
+                    </button>
+                `;
+                container.appendChild(variantCard);
+            });
+            
+            document.getElementById('totalCount').textContent = variants.length;
+            updateSelectionCount();
+        }
+        
+        function toggleVariantSelection(index) {
+            const checkbox = document.getElementById(`variant-${index}`);
+            const card = checkbox.parentElement;
+            
+            if (checkbox.checked) {
+                selectedVariantIndices.add(index);
+                card.classList.add('selected');
+            } else {
+                selectedVariantIndices.delete(index);
+                card.classList.remove('selected');
+            }
+            
+            updateSelectionCount();
+        }
+        
+        function selectAllVariants() {
+            variantsList.forEach((_, index) => {
+                selectedVariantIndices.add(index);
+                const checkbox = document.getElementById(`variant-${index}`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    checkbox.parentElement.classList.add('selected');
+                }
+            });
+            updateSelectionCount();
+        }
+        
+        function deselectAllVariants() {
+            selectedVariantIndices.clear();
+            variantsList.forEach((_, index) => {
+                const checkbox = document.getElementById(`variant-${index}`);
+                if (checkbox) {
+                    checkbox.checked = false;
+                    checkbox.parentElement.classList.remove('selected');
+                }
+            });
+            updateSelectionCount();
+        }
+        
+        function updateSelectionCount() {
+            document.getElementById('selectedCount').textContent = selectedVariantIndices.size;
+            document.getElementById('selectedVariants').textContent = selectedVariantIndices.size;
+        }
+        
+        function updateStats() {
+            document.getElementById('totalVariants').textContent = variantsList.length;
+            document.getElementById('selectedVariants').textContent = selectedVariantIndices.size;
+        }
+        
+        async function generateImages() {
+            if (selectedVariantIndices.size === 0) {
+                showMessage('请选择要生成图片的变体', 'error');
+                return;
+            }
+            
+            const selectedPrompts = Array.from(selectedVariantIndices).map(i => variantsList[i]);
+            const aspectRatio = document.querySelector('input[name="aspectRatio"]:checked').value;
+            
+            document.getElementById('loadingCard').style.display = 'block';
+            document.getElementById('loadingText').textContent = '正在生成图片，请稍候...';
+            document.getElementById('imagesCard').style.display = 'block';
+            document.getElementById('progressBar').style.display = 'block';
+            
+            const imagesGrid = document.getElementById('imagesGrid');
+            imagesGrid.innerHTML = '';
+            generatedImageIds = [];  // 重置图片ID列表
+            
+            try {
+                // 调用后端API生成图片
+                const response = await fetch('http://192.168.88.98:8000/api/images/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompts: selectedPrompts,
+                        aspect_ratio: aspectRatio  // 添加比例参数
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('图片生成失败');
+                }
+                
+                const data = await response.json();
+                
+                // 显示生成的图片并收集ID
+                data.images.forEach((image, index) => {
+                    updateProgress((index + 1) / data.images.length * 100);
+                    displayImage(image.url, image.prompt);
+                    if (image.id) {
+                        generatedImageIds.push(image.id);  // 收集图片ID
+                    }
+                });
+                
+                document.getElementById('generatedImages').textContent = data.images.length;
+                showMessage(`成功生成${data.images.length}张图片！`);
+                
+                // 显示下载按钮
+                document.getElementById('downloadAllBtn').style.display = generatedImageIds.length > 0 ? 'block' : 'none';
+                
+            } catch (error) {
+                console.error('Error:', error);
+                // 使用占位图片作为备用方案
+                generatePlaceholderImages(selectedPrompts);
+            } finally {
+                document.getElementById('loadingCard').style.display = 'none';
+                document.getElementById('progressBar').style.display = 'none';
+            }
+        }
+        
+        function generatePlaceholderImages(prompts) {
+            const imagesGrid = document.getElementById('imagesGrid');
+            
+            prompts.forEach((prompt, index) => {
+                updateProgress((index + 1) / prompts.length * 100);
+                const placeholderUrl = `https://via.placeholder.com/400x300/667eea/ffffff?text=Image+${index + 1}`;
+                displayImage(placeholderUrl, prompt);
+            });
+            
+            document.getElementById('generatedImages').textContent = prompts.length;
+            showMessage(`已生成${prompts.length}张占位图片（API暂时不可用）`, 'info');
+        }
+        
+        function displayImage(url, prompt) {
+            const imagesGrid = document.getElementById('imagesGrid');
+            const imageCard = document.createElement('div');
+            imageCard.className = 'image-card';
+            
+            // 创建图片元素
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = prompt;
+            img.onclick = () => openModal(url);
+            
+            // 创建信息容器
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'image-info';
+            
+            // 创建提示词显示
+            const promptDiv = document.createElement('div');
+            promptDiv.className = 'image-prompt';
+            promptDiv.title = prompt;
+            promptDiv.textContent = prompt;
+            
+            // 创建操作按钮容器
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'image-actions';
+            
+            // 创建下载按钮
+            const downloadBtn = document.createElement('button');
+            downloadBtn.textContent = '下载';
+            downloadBtn.onclick = () => downloadImage(url, 'image.png');
+            
+            // 创建复制按钮
+            const copyBtn = document.createElement('button');
+            copyBtn.textContent = '复制提示词';
+            copyBtn.onclick = () => copyToClipboard(prompt);
+            
+            // 组装元素
+            actionsDiv.appendChild(downloadBtn);
+            actionsDiv.appendChild(copyBtn);
+            infoDiv.appendChild(promptDiv);
+            infoDiv.appendChild(actionsDiv);
+            imageCard.appendChild(img);
+            imageCard.appendChild(infoDiv);
+            
+            imagesGrid.appendChild(imageCard);
+        }
+        
+        function updateProgress(percent) {
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = percent + '%';
+            progressFill.textContent = Math.round(percent) + '%';
+        }
+        
+        function openModal(imageUrl) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = 'block';
+            modalImg.src = imageUrl;
+        }
+        
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+        
+        function downloadImage(url, filename) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+        }
+        
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showMessage('已复制到剪贴板');
+            });
+        }
+        
+        async function downloadAllImages() {
+            if (generatedImageIds.length === 0) {
+                showMessage('没有可下载的图片', 'error');
+                return;
+            }
+            
+            showMessage('正在打包图片，请稍候...', 'info');
+            
+            try {
+                const response = await fetch('http://192.168.88.98:8000/api/images/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(generatedImageIds)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('下载失败');
+                }
+                
+                // 下载文件
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `images_batch_${new Date().getTime()}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showMessage(`成功下载${generatedImageIds.length}张图片！`);
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('批量下载失败，请重试', 'error');
+            }
+        }
+        
+        function showMessage(text, type = 'success') {
+            const msg = document.createElement('div');
+            msg.className = 'success-msg';
+            if (type === 'error') {
+                msg.style.background = '#ff4d4f';
+            } else if (type === 'info') {
+                msg.style.background = '#1890ff';
+            }
+            msg.textContent = text;
+            document.body.appendChild(msg);
+            
+            setTimeout(() => {
+                msg.remove();
+            }, 3000);
+        }
+        
+        // Enter键触发生成
+        document.getElementById('basePrompt').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                generateVariants();
+            }
+        });
+        
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // 初始化
+        initDimensions();
+    </script>
+</body>
+</html>

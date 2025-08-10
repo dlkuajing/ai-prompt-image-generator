@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配置服务器地址</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .config-card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        .options {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        .option-btn {
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+        .option-btn:hover {
+            background: #e0e0e0;
+        }
+        .info {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        .success {
+            background: #f0fff4;
+            color: #52c41a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="config-card">
+        <h1>🌐 配置服务器地址</h1>
+        <p class="subtitle">请输入AI图片生成工具的服务器地址</p>
+        
+        <div class="input-group">
+            <label for="serverIp">服务器IP地址</label>
+            <input type="text" id="serverIp" placeholder="例如: 192.168.88.98" value="192.168.88.98">
+        </div>
+        
+        <div class="input-group">
+            <label for="serverPort">端口号</label>
+            <input type="text" id="serverPort" placeholder="默认: 8000" value="8000">
+        </div>
+        
+        <button class="btn" onclick="connectToServer()">连接到服务器</button>
+        
+        <div class="options">
+            <p style="font-weight: 600; margin-bottom: 10px;">快速选择：</p>
+            <button class="option-btn" onclick="setServer('localhost', '8000')">
+                本地访问 (localhost:8000)
+            </button>
+            <button class="option-btn" onclick="setServer('192.168.88.98', '8000')">
+                局域网主服务器 (192.168.88.98:8000)
+            </button>
+        </div>
+        
+        <div class="info">
+            💡 <strong>提示：</strong><br>
+            • 本地访问请使用 localhost<br>
+            • 局域网访问请使用服务器的IP地址<br>
+            • 确保服务器端已启动后端服务
+        </div>
+        
+        <div class="success" id="successMsg">
+            ✅ 连接成功！正在跳转到主界面...
+        </div>
+    </div>
+    
+    <script>
+        function setServer(ip, port) {
+            document.getElementById('serverIp').value = ip;
+            document.getElementById('serverPort').value = port;
+        }
+        
+        async function connectToServer() {
+            const ip = document.getElementById('serverIp').value.trim();
+            const port = document.getElementById('serverPort').value.trim() || '8000';
+            
+            if (!ip) {
+                alert('请输入服务器IP地址');
+                return;
+            }
+            
+            const serverUrl = `http://${ip}:${port}`;
+            
+            // 测试连接
+            try {
+                const response = await fetch(`${serverUrl}/api/health`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                if (response.ok) {
+                    // 保存配置到localStorage
+                    localStorage.setItem('apiServerUrl', serverUrl);
+                    
+                    // 显示成功消息
+                    document.getElementById('successMsg').style.display = 'block';
+                    
+                    // 跳转到主界面
+                    setTimeout(() => {
+                        window.location.href = 'index-dynamic.html';
+                    }, 1500);
+                } else {
+                    throw new Error('连接失败');
+                }
+            } catch (error) {
+                alert(`无法连接到服务器 ${serverUrl}\n请确认：\n1. 服务器IP地址正确\n2. 后端服务已启动\n3. 防火墙允许访问`);
+            }
+        }
+        
+        // Enter键触发连接
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                connectToServer();
+            }
+        });
+    </script>
+</body>
+</html>
