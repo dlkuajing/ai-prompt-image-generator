@@ -202,8 +202,8 @@ async def generate_images(request: ImageGenerateRequest):
                                     with open(image_path, 'wb') as f:
                                         f.write(image_data)
                                     
-                                    # 返回本地URL
-                                    image_url = f"http://localhost:8000/api/images/{image_id}"
+                                    # 返回相对路径，前端会自动拼接正确的域名
+                                    image_url = f"/api/images/{image_id}"
                                     print(f"✅ 成功生成图片: {image_id}.png")
                                 else:
                                     # 如果API返回的是URL

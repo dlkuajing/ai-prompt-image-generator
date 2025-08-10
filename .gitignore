@@ -5,35 +5,15 @@ __pycache__/
 *.so
 .Python
 venv/
-env/
 ENV/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+env/
+.venv
 
 # Logs
 *.log
 logs/
-server.log
-http_server.log
-
-# Environment
-.env
-.env.local
-.env.*.local
+*.pid
+.*.pid
 
 # IDE
 .vscode/
@@ -41,52 +21,32 @@ http_server.log
 *.swp
 *.swo
 *~
-*.sublime-project
-*.sublime-workspace
-
-# macOS
 .DS_Store
-.AppleDouble
-.LSOverride
-Icon
-._*
-.DocumentRevisions-V100
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.Trashes
-.VolumeIcon.icns
-.com.apple.timemachine.donotpresent
 
-# Windows
-Thumbs.db
-Thumbs.db:encryptable
-ehthumbs.db
-ehthumbs_vista.db
-*.stackdump
-[Dd]esktop.ini
-
-# Generated files
-backend/storage/images/*.png
+# Project specific
+backend/storage/images/
 backend/storage/temp/
-*.zip
-test_*.zip
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
-# Cache
-.cache/
-*.pyc
-
-# Claude
-.claude/settings.local.json
+backend/backend.log
+frontend.log
+frp-config/*.log
+frp-config/frp_*/
+frp-config/frp-client/
 
 # Temporary files
 *.tmp
 *.bak
-*.backup
-*~
-.*.swp
+*.cache
+temp/
+tmp/
+
+# Environment
+.env
+.env.local
+
+# Test reports
+test-report.md
+frp-deployment-success.md
+
+# FRP runtime
+frpc_new.log
+frpc_running.log

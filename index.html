@@ -977,6 +977,19 @@
     </div>
     
     <script>
+        // 动态获取API地址
+        function getApiBaseUrl() {
+            // 如果是通过IP访问，使用相同的IP和8000端口
+            if (window.location.hostname === '172.104.59.98') {
+                return 'http://172.104.59.98:8000';
+            }
+            // 本地访问使用localhost
+            return 'http://localhost:8000';
+        }
+        
+        const API_BASE_URL = getApiBaseUrl();
+        console.log('API Base URL:', API_BASE_URL);
+        
         // 维度选项
         const dimensions = [
             '场景', '动作', '穿着', '光影', '站位', '情绪', '构图',
@@ -1079,7 +1092,7 @@
             
             try {
                 // 调用后端API
-                const response = await fetch('http://localhost:8000/api/variants/generate', {
+                const response = await fetch(`${API_BASE_URL}/api/variants/generate`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1249,7 +1262,7 @@
                 const imagePromises = selectedPrompts.map(async (prompt, index) => {
                     try {
                         // 调用单个图片生成API
-                        const response = await fetch('http://localhost:8000/api/images/generate', {
+                        const response = await fetch(`${API_BASE_URL}/api/images/generate`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -1334,6 +1347,11 @@
             imageCard.className = 'image-card';
             imageCard.style.animationDelay = `${index * 0.1}s`;
             
+            // 如果URL是相对路径，拼接完整的API地址
+            if (url.startsWith('/api/')) {
+                url = API_BASE_URL + url;
+            }
+            
             const img = document.createElement('img');
             img.src = url;
             img.alt = prompt;
@@ -1353,7 +1371,11 @@
             
             const downloadBtn = document.createElement('button');
             downloadBtn.textContent = '下载';
-            downloadBtn.onclick = () => downloadImage(url, `image_${index + 1}.png`);
+            // 确保下载按钮使用完整的URL
+            downloadBtn.onclick = () => {
+                const fullUrl = url.startsWith('/api/') ? API_BASE_URL + url : url;
+                downloadImage(fullUrl, `image_${index + 1}.png`);
+            };
             
             const copyBtn = document.createElement('button');
             copyBtn.textContent = '复制提示词';
@@ -1459,7 +1481,7 @@
             showMessage('正在打包图片，请稍候...', 'info');
             
             try {
-                const response = await fetch('http://localhost:8000/api/images/download', {
+                const response = await fetch(`${API_BASE_URL}/api/images/download`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

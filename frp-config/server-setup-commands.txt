@@ -1,0 +1,88 @@
+# Linode 服务器安装命令
+# 服务器 IP: 172.104.59.98
+# 请在服务器上按顺序执行以下命令
+
+# ========================================
+# 1. 先上传文件到服务器（在本地执行）
+# ========================================
+scp /Users/c.joelin/Desktop/跨海帆-闪图/frp-config/frps.ini root@172.104.59.98:/root/
+scp /Users/c.joelin/Desktop/跨海帆-闪图/frp-config/install-server.sh root@172.104.59.98:/root/
+
+# ========================================
+# 2. SSH 登录服务器
+# ========================================
+ssh root@172.104.59.98
+
+# ========================================
+# 3. 在服务器上执行安装（以下命令在服务器上执行）
+# ========================================
+
+# 下载并安装 frp
+cd /root
+wget https://github.com/fatedier/frp/releases/download/v0.52.3/frp_0.52.3_linux_amd64.tar.gz
+tar -xzf frp_0.52.3_linux_amd64.tar.gz
+cd frp_0.52.3_linux_amd64
+
+# 复制配置文件
+cp /root/frps.ini ./frps.ini
+
+# 测试运行（先手动测试）
+./frps -c frps.ini
+
+# 如果测试成功，按 Ctrl+C 停止，然后创建系统服务
+# 创建 systemd 服务文件
+cat > /etc/systemd/system/frps.service << 'EOF'
+[Unit]
+Description=frp server
+After=network.target syslog.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+Restart=on-failure
+RestartSec=5s
+WorkingDirectory=/root/frp_0.52.3_linux_amd64
+ExecStart=/root/frp_0.52.3_linux_amd64/frps -c /root/frp_0.52.3_linux_amd64/frps.ini
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# 启动服务
+systemctl daemon-reload
+systemctl enable frps
+systemctl start frps
+
+# 检查服务状态
+systemctl status frps
+
+# 开放防火墙端口（Ubuntu/Debian）
+ufw allow 7000/tcp
+ufw allow 7500/tcp  
+ufw allow 8000/tcp
+ufw allow 8888/tcp
+ufw allow 8080/tcp
+ufw status
+
+# 或者使用 iptables
+iptables -A INPUT -p tcp --dport 7000 -j ACCEPT
+iptables -A INPUT -p tcp --dport 7500 -j ACCEPT
+iptables -A INPUT -p tcp --dport 8000 -j ACCEPT
+iptables -A INPUT -p tcp --dport 8888 -j ACCEPT
+iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
+
+# 查看日志
+journalctl -u frps -f
+
+# ========================================
+# 4. 验证安装
+# ========================================
+
+# 检查端口监听
+netstat -tlnp | grep frps
+
+# 访问 Dashboard
+# 浏览器打开: http://172.104.59.98:7500
+# 用户名: admin
+# 密码: KuaHaiFan2024!
