@@ -1410,11 +1410,38 @@
             document.getElementById('imageModal').style.display = 'none';
         }
         
-        function downloadImage(url, filename) {
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.click();
+        async function downloadImage(url, filename) {
+            try {
+                // 获取图片数据
+                const response = await fetch(url);
+                const blob = await response.blob();
+                
+                // 创建blob URL
+                const blobUrl = window.URL.createObjectURL(blob);
+                
+                // 创建下载链接
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename || `image_${Date.now()}.png`;
+                document.body.appendChild(a);
+                a.click();
+                
+                // 清理
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                
+                showMessage('图片下载成功！');
+            } catch (error) {
+                console.error('下载失败:', error);
+                // 如果fetch失败，尝试直接下载
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename || `image_${Date.now()}.png`;
+                a.target = '_blank';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
         }
         
         function copyToClipboard(text) {

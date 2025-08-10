@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试图片下载功能</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .test-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+        
+        .test-description {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .image-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .image-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            background: white;
+        }
+        
+        .image-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .image-actions {
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-download {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-test {
+            background: #52c41a;
+            color: white;
+        }
+        
+        .btn-test:hover {
+            background: #389e0d;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .status.success {
+            background: #f6ffed;
+            color: #52c41a;
+            border: 1px solid #b7eb8f;
+            display: block;
+        }
+        
+        .status.error {
+            background: #fff2f0;
+            color: #ff4d4f;
+            border: 1px solid #ffccc7;
+            display: block;
+        }
+        
+        .status.info {
+            background: #e6f7ff;
+            color: #1890ff;
+            border: 1px solid #91d5ff;
+            display: block;
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 图片下载功能测试</h1>
+        
+        <!-- 测试1：本地图片下载 -->
+        <div class="test-section">
+            <h2 class="test-title">测试 1：本地服务器图片下载</h2>
+            <p class="test-description">
+                测试从本地服务器（localhost:8000）下载图片，这是最常见的使用场景。
+            </p>
+            <div class="image-container">
+                <div class="image-card">
+                    <img src="http://localhost:8000/api/images/test1" alt="测试图片1" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\'%3E%3Crect fill=\'%23ddd\' width=\'300\' height=\'200\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23999\'%3E测试图片1%3C/text%3E%3C/svg%3E'">
+                    <div class="image-actions">
+                        <button class="btn btn-download" onclick="testDownload1()">下载测试</button>
+                    </div>
+                </div>
+            </div>
+            <div id="status1" class="status"></div>
+        </div>
+        
+        <!-- 测试2：跨域图片下载 -->
+        <div class="test-section">
+            <h2 class="test-title">测试 2：跨域图片下载</h2>
+            <p class="test-description">
+                测试从外部URL下载图片，验证跨域处理是否正常。
+            </p>
+            <div class="image-container">
+                <div class="image-card">
+                    <img src="https://via.placeholder.com/300x200/667eea/ffffff?text=测试图片" alt="测试图片2">
+                    <div class="image-actions">
+                        <button class="btn btn-download" onclick="testDownload2()">下载测试</button>
+                    </div>
+                </div>
+            </div>
+            <div id="status2" class="status"></div>
+        </div>
+        
+        <!-- 测试3：Data URL下载 -->
+        <div class="test-section">
+            <h2 class="test-title">测试 3：Data URL 图片下载</h2>
+            <p class="test-description">
+                测试从Data URL下载图片，这种情况下不需要网络请求。
+            </p>
+            <div class="image-container">
+                <div class="image-card">
+                    <canvas id="testCanvas" width="300" height="200"></canvas>
+                    <div class="image-actions">
+                        <button class="btn btn-test" onclick="generateDataUrl()">生成图片</button>
+                        <button class="btn btn-download" onclick="testDownload3()">下载测试</button>
+                    </div>
+                </div>
+            </div>
+            <div id="status3" class="status"></div>
+        </div>
+        
+        <!-- 代码展示 -->
+        <div class="test-section">
+            <h2 class="test-title">优化后的下载函数</h2>
+            <p class="test-description">
+                新的下载函数使用 Blob 和 createObjectURL 方法，确保图片能够正确下载而不是在新标签页打开。
+            </p>
+            <div class="code-block">
+async function downloadImage(url, filename) {
+    try {
+        // 获取图片数据
+        const response = await fetch(url);
+        const blob = await response.blob();
+        
+        // 创建blob URL
+        const blobUrl = window.URL.createObjectURL(blob);
+        
+        // 创建下载链接
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename || \`image_\${Date.now()}.png\`;
+        document.body.appendChild(a);
+        a.click();
+        
+        // 清理
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(blobUrl);
+        
+        showMessage('图片下载成功！');
+    } catch (error) {
+        console.error('下载失败:', error);
+        // 备用方案...
+    }
+}
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let dataUrl = '';
+        
+        // 优化后的下载函数
+        async function downloadImage(url, filename) {
+            try {
+                let blob;
+                
+                // 处理data URL
+                if (url.startsWith('data:')) {
+                    const response = await fetch(url);
+                    blob = await response.blob();
+                } else {
+                    // 处理普通URL
+                    const response = await fetch(url);
+                    blob = await response.blob();
+                }
+                
+                // 创建blob URL
+                const blobUrl = window.URL.createObjectURL(blob);
+                
+                // 创建下载链接
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename || `image_${Date.now()}.png`;
+                document.body.appendChild(a);
+                a.click();
+                
+                // 清理
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                
+                return true;
+            } catch (error) {
+                console.error('下载失败:', error);
+                
+                // 如果fetch失败，尝试直接下载
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename || `image_${Date.now()}.png`;
+                a.target = '_blank';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                return false;
+            }
+        }
+        
+        function showStatus(id, message, type) {
+            const status = document.getElementById(id);
+            status.className = `status ${type}`;
+            status.textContent = message;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 3000);
+        }
+        
+        async function testDownload1() {
+            showStatus('status1', '正在下载...', 'info');
+            const success = await downloadImage('http://localhost:8000/api/images/test1', 'local_test.png');
+            if (success) {
+                showStatus('status1', '✅ 下载成功！文件已保存到下载文件夹', 'success');
+            } else {
+                showStatus('status1', '⚠️ 下载可能需要手动保存', 'error');
+            }
+        }
+        
+        async function testDownload2() {
+            showStatus('status2', '正在下载...', 'info');
+            const success = await downloadImage('https://via.placeholder.com/300x200/667eea/ffffff?text=测试图片', 'cross_origin_test.png');
+            if (success) {
+                showStatus('status2', '✅ 下载成功！文件已保存到下载文件夹', 'success');
+            } else {
+                showStatus('status2', '⚠️ 由于跨域限制，可能需要手动保存', 'error');
+            }
+        }
+        
+        function generateDataUrl() {
+            const canvas = document.getElementById('testCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // 绘制渐变背景
+            const gradient = ctx.createLinearGradient(0, 0, 300, 200);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 300, 200);
+            
+            // 绘制文字
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('测试图片', 150, 100);
+            
+            dataUrl = canvas.toDataURL('image/png');
+            showStatus('status3', '图片已生成', 'success');
+        }
+        
+        async function testDownload3() {
+            if (!dataUrl) {
+                showStatus('status3', '请先点击"生成图片"按钮', 'error');
+                return;
+            }
+            
+            showStatus('status3', '正在下载...', 'info');
+            const success = await downloadImage(dataUrl, 'data_url_test.png');
+            if (success) {
+                showStatus('status3', '✅ 下载成功！文件已保存到下载文件夹', 'success');
+            } else {
+                showStatus('status3', '⚠️ 下载失败', 'error');
+            }
+        }
+        
+        // 页面加载时生成测试图片
+        window.onload = () => {
+            generateDataUrl();
+        };
+    </script>
+</body>
+</html>
