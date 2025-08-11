@@ -144,9 +144,21 @@ start_frpc() {
         sleep 2
     fi
     
-    # 启动 frpc
+    # 启动 frpc (后台运行，避免阻塞)
     print_info "正在连接到服务器..."
-    ${INSTALL_DIR}/frpc -c ${CONFIG_FILE}
+    nohup ${INSTALL_DIR}/frpc -c ${CONFIG_FILE} >> frpc.log 2>&1 &
+    FRP_PID=$!
+    
+    # 等待一下让服务启动
+    sleep 2
+    
+    # 检查是否成功启动
+    if ps -p $FRP_PID > /dev/null; then
+        echo -e "${GREEN}✓ FRP客户端已启动${NC}"
+    else
+        print_error "FRP客户端启动失败，请检查日志: frpc.log"
+        return 1
+    fi
 }
 
 # 显示连接信息

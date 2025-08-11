@@ -9,7 +9,7 @@
 - 🖼️ **批量图片生成** - 使用Imagen 4 API生成高质量图片
 - 📐 **多种比例支持** - 支持5种图片比例（1:1、9:16、16:9、3:4、4:3）
 - 📥 **批量下载** - 一键打包下载所有生成的图片
-- 🌐 **Web界面** - 友好的交互界面，支持局域网访问
+- 🌐 **全球访问** - 支持FRP内网穿透，实现全球访问
 
 ## 技术架构
 
@@ -44,13 +44,18 @@ GEMINI_API_KEY=AIzaSyB-ZYo5kMjtpqnOyjEELzy8PD8VnMTuvkw
 │   ├── test_api.py            # API测试脚本
 │   ├── test_gemini_models.py  # 模型列表测试
 │   ├── requirements.txt       # Python依赖
-│   ├── storage/
-│   │   ├── images/            # 生成的图片存储
-│   │   └── temp/              # 临时文件
+│   ├── storage/               # 存储目录
 │   └── venv/                  # Python虚拟环境
+├── frp-config/                 # FRP配置目录
+│   ├── frpc.ini              # 客户端配置
+│   ├── frps.ini              # 服务器配置
+│   └── start-client.sh       # 客户端启动脚本
 ├── index.html                  # 主界面
-├── demo_new_features.html     # 新功能演示页面
-├── view_images.html           # 图片查看页面
+├── start-all.sh               # 一键启动脚本
+├── stop-all.sh                # 一键停止脚本
+├── README.md                  # 项目说明
+├── README_STARTUP.md          # 启动指南
+├── API替换指南.md             # API密钥替换说明
 └── CLAUDE.md                  # 项目文档（本文件）
 ```
 
@@ -112,18 +117,27 @@ venv\Scripts\activate  # Windows
 pip install -r requirements.txt
 ```
 
-### 2. 启动后端服务
+### 2. 一键启动所有服务
 
 ```bash
-# 在backend目录下
-python main.py
+# 在项目根目录
+./start-all.sh
 ```
 
-服务将在 `http://localhost:8000` 启动
+这会自动：
+- 启动后端API服务（端口8000）
+- 启动前端静态服务（端口8080）
+- 询问是否启动FRP全球访问功能
 
-### 3. 打开前端界面
+### 3. 访问服务
 
-直接在浏览器中打开 `index.html` 文件，或通过HTTP服务器访问。
+**本地访问**:
+- Web界面: http://localhost:8080
+- API文档: http://localhost:8000/docs
+
+**全球访问**（需启动FRP）:
+- Web界面: http://172.104.59.98:8888
+- API服务: http://172.104.59.98:8000
 
 ## API接口文档
 
@@ -242,6 +256,16 @@ sudo systemctl start redis
 - 检查CORS配置
 - 使用`http://localhost:8000`而非`file://`协议
 
+4. **FRP连接失败**
+- 检查服务器上是否有其他FRP服务占用端口
+- 确认服务器防火墙开放了必要端口（7000, 7500, 8000, 8888）
+- 查看frpc.log日志文件排查问题
+
+5. **外网访问时API调用失败**
+- 前端会自动判断访问来源并切换API地址
+- 确保FRP客户端正常运行
+- 检查服务器端FRP服务状态
+
 ## 开发路线图
 
 ### 已完成功能 ✅
@@ -284,5 +308,5 @@ sudo systemctl start redis
 
 ---
 
-*最后更新: 2025年8月10日*
-*版本: 2.0.0*
+*最后更新: 2025年8月11日*
+*版本: 2.1.0*
